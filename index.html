@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lala Lab — 建筑 · 艺术 · 游戏</title>
+<style>
+/* ================================================================
+   Lala Lab — 个人作品集网站
+   风格参考：GOA（图像网格 / 全屏搜索 / 双语）× 家琨建筑（留白 / 文人气）
+   ================================================================ */
+:root{
+  --bg:#ffffff;
+  --ink:#141414;
+  --ink-2:#6f6f6f;
+  --ink-3:#a8a8a8;
+  --line:#e6e3de;
+  --wash:#f5f3f0;
+  --accent:#9a3b26;            /* 朱砂色，仅极少量使用 */
+  --font-sans:"Helvetica Neue","Segoe UI",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans SC","Microsoft YaHei",sans-serif;
+  --font-display:"Helvetica Neue","Segoe UI",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans SC","Microsoft YaHei",sans-serif;
+  /* 英文标注层：等宽字体（图纸注记感），中文回落到黑体，绝不回落宋体 */
+  --font-mono:"SFMono-Regular","SF Mono",ui-monospace,Consolas,"Roboto Mono",Menlo,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",monospace;
+  --maxw:1280px;
+  --pad:clamp(20px,4vw,56px);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:15px;line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;background:none;border:none;cursor:pointer;color:inherit;}
+::selection{background:#141414;color:#fff;}
+
+/* ---------- 顶栏 ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  transition:background .4s ease,border-color .4s ease;
+}
+/* 首页顶部：顶栏透明悬浮在整屏大图上 */
+body.hero-top header{
+  background:transparent;border-bottom-color:transparent;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+body.hero-top .wordmark{color:#fff;}
+body.hero-top .wordmark .zh{color:rgba(255,255,255,.72);}
+body.hero-top nav .nav-link{color:rgba(255,255,255,.82);}
+body.hero-top nav .nav-link:hover,body.hero-top nav .nav-link.active{color:#fff;}
+body.hero-top nav .nav-link::after{background:#fff;}
+body.hero-top .icon-btn{color:rgba(255,255,255,.88);}
+body.hero-top .icon-btn:hover{color:#fff;}
+body.hero-top .lang-opt{color:rgba(255,255,255,.6);}
+body.hero-top .lang-opt.on,body.hero-top .lang-opt:hover{color:#fff;}
+body.hero-top .lang-sep{color:rgba(255,255,255,.35);}
+body.hero-top .burger span{background:#fff;}
+body.mobile-open header{background:rgba(255,255,255,.96);border-bottom-color:var(--line);}
+body.mobile-open .wordmark{color:var(--ink);}
+body.mobile-open .wordmark .zh{color:var(--ink-2);}
+body.mobile-open .icon-btn{color:var(--ink-2);}
+body.mobile-open .lang-opt{color:var(--ink-3);}
+body.mobile-open .lang-opt.on{color:var(--ink);}
+body.mobile-open .lang-sep{color:var(--line);}
+body.mobile-open .burger span{background:var(--ink);}
+.header-inner{
+  max-width:var(--maxw);margin:0 auto;padding:0 var(--pad);
+  height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px;
+}
+.wordmark{display:flex;flex-direction:column;line-height:1.25;}
+.wordmark .en{
+  font-family:var(--font-mono);font-size:17px;font-weight:300;letter-spacing:.2em;
+  text-transform:uppercase;white-space:nowrap;
+}
+.wordmark .zh{font-size:10.5px;letter-spacing:.46em;color:var(--ink-2);white-space:nowrap;margin-top:2px;}
+nav{display:flex;align-items:center;gap:clamp(10px,1.8vw,26px);height:72px;}
+.nav-item{position:relative;display:flex;align-items:center;height:72px;}
+nav .nav-link{
+  font-size:13.5px;letter-spacing:.12em;color:var(--ink-2);
+  padding:6px 0;position:relative;white-space:nowrap;transition:color .25s,background .25s;
+}
+/* 「关于」下拉：悬停仅弹出菜单；父项本身不导航、无底色，与相邻栏目等间距 */
+.nav-item.has-sub > .nav-link{
+  display:flex;align-items:center;gap:6px;padding:6px 0;
+  background:none;border:none;cursor:pointer;
+}
+.nav-item.has-sub > .nav-link .caret{transition:transform .3s;opacity:.7;}
+.nav-item.has-sub:hover > .nav-link{color:var(--ink);}
+.nav-item.has-sub:hover > .nav-link .caret,
+.nav-item.has-sub.open > .nav-link .caret{transform:rotate(180deg);}
+.sub-menu{
+  position:absolute;top:72px;left:-26px;min-width:160px;
+  background:#fff;border:1px solid var(--line);border-top:none;
+  padding:8px 0;display:none;z-index:120;
+}
+.nav-item.has-sub:hover .sub-menu,
+.nav-item.has-sub:focus-within .sub-menu,
+.nav-item.has-sub.open .sub-menu{display:block;}
+.sub-menu a{
+  display:block;padding:14px 24px;font-size:13.5px;letter-spacing:.1em;
+  color:var(--ink-2);transition:.2s;white-space:nowrap;
+}
+.sub-menu a:hover{color:var(--ink);background:var(--wash);}
+nav .nav-link::after{
+  content:"";position:absolute;left:0;bottom:0;height:1px;width:0;
+  background:var(--ink);transition:width .3s ease;
+}
+nav .nav-link:hover{color:var(--ink);}
+nav .nav-link.active{color:var(--ink);}
+nav .nav-link.active::after,nav .nav-link:hover::after{width:100%;}
+.nav-tools{display:flex;align-items:center;gap:18px;margin-left:6px;}
+.icon-btn{display:flex;align-items:center;justify-content:center;padding:4px;color:var(--ink-2);transition:color .25s;}
+.icon-btn:hover{color:var(--ink);}
+/* 中英文切换：与导航同字体同字号，仿参考图「中文 | ENGLISH」 */
+.lang-switch{display:flex;align-items:center;gap:12px;}
+.lang-opt{font-size:13.5px;letter-spacing:.12em;color:var(--ink-3);padding:4px 0;transition:color .25s;white-space:nowrap;}
+.lang-opt:hover{color:var(--ink);}
+.lang-opt.on{color:var(--ink);}
+.lang-sep{color:var(--line);font-size:13px;}
+.burger{display:none;}
+
+/* ---------- 移动端菜单 ---------- */
+@media (max-width:880px){
+  .wordmark .en{font-size:15px;letter-spacing:.16em;}
+  .wordmark .zh{letter-spacing:.3em;font-size:9.5px;}
+  nav .nav-item{display:none;}
+  .lang-opt{font-size:12px;}
+  .burger{display:flex;flex-direction:column;gap:5px;padding:6px;}
+  .burger span{display:block;width:22px;height:1px;background:var(--ink);transition:.3s;}
+  .mobile-open .burger span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+  .mobile-open .burger span:nth-child(2){opacity:0;}
+  .mobile-open .burger span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+}
+.mobile-menu{
+  position:fixed;inset:72px 0 0 0;background:#fff;z-index:99;
+  display:none;flex-direction:column;padding:8vh var(--pad);gap:4px;
+}
+.mobile-open .mobile-menu{display:flex;}
+.mobile-menu a{
+  font-family:var(--font-display);font-weight:300;font-size:24px;letter-spacing:.12em;padding:14px 0;
+  border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;
+}
+.mobile-menu a small{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase;}
+.mobile-menu a.mm-sub{font-size:16px;font-weight:400;padding:11px 0 11px 22px;color:var(--ink-2);border-bottom:1px solid var(--wash);}
+.mobile-menu .mm-head{
+  font-family:var(--font-display);font-weight:300;font-size:24px;letter-spacing:.12em;
+  padding:14px 0;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:baseline;color:var(--ink);
+}
+.mobile-menu .mm-head small{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--ink-3);text-transform:uppercase;}
+@media (max-width:430px){.wordmark .zh{display:none;}.header-inner{gap:12px;}}
+
+/* ---------- 版面容器 ---------- */
+main{padding-top:72px;min-height:calc(100vh - 220px);}
+body.route-home main{padding-top:0;}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad);}
+.page{animation:fadein .5s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+/* ---------- 页面标题 ---------- */
+.page-head{padding:clamp(40px,7vh,84px) 0 30px;border-bottom:1px solid var(--line);margin-bottom:44px;}
+.page-head h1{font-family:var(--font-display);font-size:clamp(28px,3.6vw,42px);font-weight:200;letter-spacing:.16em;}
+.page-head .sub{margin-top:8px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);}
+.page-head .desc{margin-top:18px;max-width:640px;color:var(--ink-2);font-size:14px;}
+
+/* ---------- 首页 Hero ---------- */
+.hero{position:relative;height:100vh;min-height:520px;overflow:hidden;background:#0f0f0f;}
+.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.4s ease;pointer-events:none;}
+.hero-slide.on{opacity:1;pointer-events:auto;}
+.hero-slide .ph,.hero-slide img{width:100%;height:100%;object-fit:cover;}
+.hero-veil{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.34) 0%,rgba(0,0,0,0) 20%),linear-gradient(to top,rgba(0,0,0,.55) 0%,rgba(0,0,0,0) 45%);}
+.hero-cap{
+  position:absolute;left:0;right:0;bottom:0;color:#fff;
+  padding:0 var(--pad) clamp(30px,6vh,64px);
+  max-width:var(--maxw);margin:0 auto;
+}
+.hero-cap .cat{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;opacity:.8;}
+.hero-cap h2{font-family:var(--font-display);font-weight:200;font-size:clamp(26px,4vw,46px);letter-spacing:.14em;margin-top:10px;}
+.hero-cap .en-t{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;opacity:.8;margin-top:8px;text-transform:uppercase;}
+.hero-dots{position:absolute;right:var(--pad);bottom:34px;display:flex;gap:10px;z-index:5;}
+.hero-dots button{width:26px;height:2px;background:rgba(255,255,255,.35);transition:background .3s;}
+.hero-dots button.on{background:#fff;}
+.hero-scroll{
+  position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
+  color:#fff;opacity:.7;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;
+  animation:bob 2.4s ease-in-out infinite;
+}
+@keyframes bob{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,6px);}}
+
+/* ---------- 首页分区 ---------- */
+.home-sec{padding:clamp(50px,9vh,110px) 0 0;}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:34px;}
+.sec-head h3{font-family:var(--font-display);font-size:clamp(20px,2.4vw,28px);font-weight:300;letter-spacing:.16em;}
+.sec-head .more{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);transition:color .25s;}
+.sec-head .more:hover{color:var(--accent);}
+.intro-block{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:clamp(28px,5vw,80px);align-items:start;}
+.intro-block .lede{font-family:var(--font-display);font-weight:300;font-size:clamp(19px,2.1vw,25px);line-height:2;letter-spacing:.08em;}
+.intro-block .body{color:var(--ink-2);font-size:14.5px;}
+.intro-block .body p+p{margin-top:14px;}
+@media (max-width:760px){.intro-block{grid-template-columns:1fr;}}
+
+/* ---------- 项目网格（GOA 式） ---------- */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;}
+@media (max-width:960px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:560px){.grid{grid-template-columns:1fr;}}
+.card{display:block;}
+.card .thumb{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--wash);}
+.card .thumb .ph,.card .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .8s ease,filter .5s ease;}
+.card:hover .thumb .ph,.card:hover .thumb img{transform:scale(1.045);}
+.card .thumb .veil{
+  position:absolute;inset:0;background:rgba(15,15,15,0);transition:background .4s;
+  display:flex;align-items:flex-end;padding:18px;
+}
+.card:hover .thumb .veil{background:rgba(15,15,15,.34);}
+.card .thumb .veil span{
+  color:#fff;font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+  opacity:0;transform:translateY(8px);transition:.4s;
+}
+.card:hover .thumb .veil span{opacity:1;transform:none;}
+.card .meta{padding:12px 2px 0;}
+.card .meta .t{font-size:15.5px;letter-spacing:.05em;}
+.card .meta .s{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.08em;margin-top:5px;text-transform:uppercase;}
+
+/* ---------- 分类筛选 ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:6px 26px;margin-bottom:38px;}
+.filters button{
+  font-size:13.5px;letter-spacing:.12em;color:var(--ink-2);
+  padding:4px 0;border-bottom:1px solid transparent;transition:.25s;
+}
+.filters button:hover{color:var(--ink);}
+.filters button.on{color:var(--ink);border-bottom-color:var(--ink);}
+
+/* ---------- 项目详情 ---------- */
+.detail-hero{margin:0 0 40px;position:relative;aspect-ratio:21/9;min-height:280px;overflow:hidden;background:var(--wash);}
+.detail-hero .ph,.detail-hero img{width:100%;height:100%;object-fit:cover;}
+.detail-grid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:clamp(28px,5vw,80px);}
+@media (max-width:760px){.detail-grid{grid-template-columns:1fr;}}
+.spec{font-size:13px;}
+.spec dl{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;}
+.spec dt{font-family:var(--font-mono);color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;font-size:10px;padding-top:3px;white-space:nowrap;}
+.spec dd{color:var(--ink);letter-spacing:.04em;}
+.detail-body{color:var(--ink-2);font-size:15px;max-width:680px;}
+.detail-body p+p{margin-top:16px;}
+.detail-title h1{font-family:var(--font-display);font-size:clamp(26px,3.4vw,40px);font-weight:200;letter-spacing:.14em;}
+.detail-title .en-t{font-size:12.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-3);margin-top:8px;}
+.detail-title{padding:clamp(36px,6vh,64px) 0 26px;}
+.gallery{display:grid;gap:22px;margin:52px 0 0;}
+.gallery .g-item{aspect-ratio:16/9;overflow:hidden;background:var(--wash);}
+.gallery .g-item.tall{aspect-ratio:4/3;}
+.gallery .g-item .ph,.gallery .g-item img{width:100%;height:100%;object-fit:cover;}
+.gallery-2{grid-template-columns:1fr 1fr;}
+@media (max-width:640px){.gallery-2{grid-template-columns:1fr;}}
+.back-link{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin:46px 0 0;transition:color .25s;}
+.back-link:hover{color:var(--accent);}
+.next-prev{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:56px;padding:26px 0 0;gap:20px;}
+.next-prev a{font-size:13.5px;color:var(--ink-2);letter-spacing:.06em;max-width:45%;transition:color .25s;}
+.next-prev a:hover{color:var(--ink);}
+.next-prev .lab{display:block;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
+
+/* ---------- 摄影 ---------- */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media (max-width:960px){.photo-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:560px){.photo-grid{grid-template-columns:1fr;}}
+.photo-item{cursor:zoom-in;}
+.photo-item .thumb{aspect-ratio:1/1;overflow:hidden;background:var(--wash);position:relative;}
+.play-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.play-badge span{
+  width:50px;height:50px;border:1px solid rgba(255,255,255,.85);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22);
+}
+.play-badge svg{margin-left:3px;}
+.photo-item:nth-child(4n+1) .thumb{aspect-ratio:4/5;}
+.photo-item:nth-child(4n+3) .thumb{aspect-ratio:5/4;}
+.photo-item .thumb .ph,.photo-item .thumb img{width:100%;height:100%;object-fit:cover;transition:transform .8s;}
+.photo-item:hover .thumb .ph,.photo-item:hover .thumb img{transform:scale(1.04);}
+.photo-item .cap{font-size:12.5px;color:var(--ink-2);margin-top:9px;letter-spacing:.06em;}
+
+/* ---------- 随笔（博客列表与文章页） ---------- */
+.essay-list{border-top:1px solid var(--line);}
+.essay-item{
+  display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 38px;
+  padding:36px 2px;border-bottom:1px solid var(--line);align-items:start;
+}
+@media (max-width:640px){.essay-item{grid-template-columns:1fr;gap:8px;padding:28px 2px;}}
+.essay-item .date{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em;padding-top:9px;}
+.essay-item .e-title{
+  display:block;font-family:var(--font-display);font-weight:300;
+  font-size:clamp(19px,2.2vw,25px);letter-spacing:.1em;line-height:1.6;transition:color .25s;
+}
+.essay-item:hover .e-title{color:var(--accent);}
+.essay-item .e-ex{
+  color:var(--ink-2);font-size:14px;margin-top:10px;max-width:640px;line-height:1.9;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.essay-article{max-width:720px;margin:0 auto;padding-top:clamp(28px,5vh,56px);}
+.essay-meta{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.12em;text-transform:uppercase;display:flex;gap:20px;}
+.essay-article h1{
+  font-family:var(--font-display);font-weight:200;
+  font-size:clamp(26px,3.4vw,38px);letter-spacing:.12em;line-height:1.7;margin:16px 0 6px;
+}
+.essay-sub{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);letter-spacing:.14em;text-transform:uppercase;}
+.essay-body{margin-top:38px;color:#3c3c3c;font-size:15.5px;line-height:2.15;letter-spacing:.02em;}
+.essay-body p{margin:0 0 1.7em;}
+.essay-body p:first-child{font-size:17px;color:var(--ink);}
+.essay-fig{margin:44px 0;}
+.essay-fig .fig-img{aspect-ratio:16/9;overflow:hidden;background:var(--wash);}
+.essay-fig .fig-img .ph,.essay-fig .fig-img img{width:100%;height:100%;object-fit:cover;}
+.essay-fig figcaption{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.08em;margin-top:12px;}
+
+/* ---------- 灯箱 ---------- */
+.lightbox{
+  position:fixed;inset:0;z-index:300;background:rgba(12,12,12,.94);
+  display:none;align-items:center;justify-content:center;padding:6vh 6vw;
+}
+.lightbox.open{display:flex;}
+.lightbox .lb-img{max-width:100%;max-height:82vh;}
+.lightbox .lb-img .ph{width:min(80vw,1000px);height:min(70vh,700px);}
+.lightbox .lb-cap{position:absolute;bottom:3vh;left:8vw;right:8vw;text-align:center;color:#bbb;font-size:12.5px;letter-spacing:.14em;}
+.lightbox .lb-desc{margin-top:9px;font-size:12px;color:#8b8b8b;line-height:1.9;letter-spacing:.06em;white-space:pre-line;}
+.lightbox .lb-x{position:absolute;top:26px;right:32px;color:#fff;font-size:26px;font-weight:200;}
+
+/* ---------- 荣誉 / 发表（家琨式文字列表） ---------- */
+.list-rows{border-top:1px solid var(--line);}
+.row{
+  display:grid;grid-template-columns:86px minmax(0,1fr) auto;gap:18px;
+  padding:20px 2px;border-bottom:1px solid var(--line);align-items:baseline;
+}
+.row .yr{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-3);letter-spacing:.06em;}
+.row .t{font-size:15px;letter-spacing:.04em;}
+.row .t small{display:block;font-size:12px;color:var(--ink-3);letter-spacing:.1em;margin-top:3px;}
+.row .tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;}
+.row a.t:hover{color:var(--accent);}
+@media (max-width:560px){.row{grid-template-columns:64px 1fr;}.row .tag{display:none;}}
+.sub-sec{margin-bottom:64px;}
+.sub-sec h2{font-family:var(--font-display);font-size:22px;font-weight:300;letter-spacing:.18em;margin-bottom:6px;}
+.sub-sec .sub-en{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:22px;}
+
+/* ---------- 关于 / 联系（家琨式：文字为主、窄栏、分节标签列） ---------- */
+.jk-lede{
+  font-family:var(--font-display);font-weight:300;
+  font-size:clamp(18px,2vw,24px);line-height:2.1;letter-spacing:.06em;
+  max-width:780px;margin:0 0 clamp(44px,8vh,80px);color:var(--ink);
+}
+.jk-secs{border-top:1px solid var(--line);margin-bottom:40px;}
+.jk-sec{
+  display:grid;grid-template-columns:190px minmax(0,1fr);gap:20px 28px;
+  padding:38px 0;border-bottom:1px solid var(--line);
+}
+@media (max-width:640px){.jk-sec{grid-template-columns:1fr;gap:14px;padding:28px 0;}}
+.jk-label{font-size:14.5px;letter-spacing:.14em;color:var(--ink);}
+.jk-label span{
+  display:block;font-family:var(--font-mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:5px;
+}
+.jk-content{color:var(--ink-2);font-size:14.5px;max-width:620px;}
+.jk-content p+p{margin-top:14px;}
+.jk-portrait{width:190px;aspect-ratio:3/4;overflow:hidden;background:var(--wash);margin-bottom:20px;filter:grayscale(1);}
+.jk-portrait .ph,.jk-portrait img{width:100%;height:100%;object-fit:cover;}
+.jk-name{font-size:16.5px;color:var(--ink);letter-spacing:.08em;}
+.jk-role{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:5px 0 18px;}
+.jk-line{font-size:15px;color:var(--ink);letter-spacing:.04em;line-height:2.3;}
+.jk-line a:hover{color:var(--accent);}
+.jk-line small{color:var(--ink-3);font-size:13px;margin-left:10px;}
+
+/* ---------- 搜索（GOA 式全屏搜索） ---------- */
+.search-layer{
+  position:fixed;inset:0;z-index:200;background:#ffffff;
+  display:none;flex-direction:column;overflow:hidden;
+}
+.search-layer.open{display:flex;}
+.search-top{max-width:900px;width:100%;margin:0 auto;padding:14vh var(--pad) 0;}
+.search-box{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--ink);padding-bottom:14px;}
+.search-box svg{flex:none;color:var(--ink-3);}
+#searchInput{
+  flex:1;border:none;outline:none;background:none;
+  font-family:var(--font-display);font-weight:200;font-size:clamp(22px,3.4vw,34px);
+  letter-spacing:.1em;color:var(--ink);
+}
+#searchInput::placeholder{color:var(--ink-3);}
+.search-x{position:absolute;top:26px;right:32px;font-size:30px;font-weight:200;color:var(--ink-2);}
+.search-x:hover{color:var(--ink);}
+.search-hint{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:16px;}
+.search-results{max-width:900px;width:100%;margin:0 auto;padding:34px var(--pad) 10vh;overflow-y:auto;flex:1;}
+.sr-group{margin-bottom:38px;}
+.sr-group h5{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:8px;}
+.sr-item{display:flex;justify-content:space-between;gap:20px;padding:12px 2px;border-bottom:1px solid var(--wash);font-size:15px;align-items:baseline;}
+.sr-item:hover{color:var(--accent);}
+.sr-item .r{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+.sr-item mark{background:none;color:var(--accent);font-weight:500;}
+.sr-empty{color:var(--ink-3);font-size:14px;letter-spacing:.1em;padding:20px 0;}
+
+/* ---------- 页脚（GOA 式深底） ---------- */
+footer{background:#141414;color:#8d8d8d;margin-top:clamp(60px,10vh,120px);}
+.footer-inner{
+  max-width:var(--maxw);margin:0 auto;padding:56px var(--pad) 40px;
+  display:grid;grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,1fr));gap:40px;
+}
+@media (max-width:760px){.footer-inner{grid-template-columns:1fr;gap:28px;}}
+footer .fw .en{font-family:var(--font-mono);font-weight:300;font-size:15px;letter-spacing:.2em;color:#fff;text-transform:uppercase;}
+footer .fw .zh{font-size:10px;letter-spacing:.44em;margin-top:7px;color:#8d8d8d;}
+footer h6{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5d5d5d;margin-bottom:14px;}
+footer a,footer p{font-size:13px;color:#8d8d8d;line-height:2.1;display:block;}
+footer a:hover{color:#fff;}
+.footer-base{border-top:1px solid #262626;}
+.footer-base .container{display:flex;justify-content:space-between;gap:16px;padding-top:18px;padding-bottom:18px;font-size:11.5px;color:#5d5d5d;letter-spacing:.08em;flex-wrap:wrap;}
+
+/* ---------- 占位图公共 ---------- */
+.ph{background-size:cover;background-position:center;position:relative;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ================================================================
+   ★★★ 内容数据区 —— 以后改文字、换图片，只需要编辑这一段 ★★★
+
+   一、改文字：
+       所有文字都写成 {zh:"中文", en:"English"} 的形式，
+       直接修改引号里的内容即可，中英文互相独立。
+
+   二、换图片：
+       每个项目 / 照片都有 img 和 gallery 字段。
+       · img:null 时会自动生成一张灰色占位图；
+       · 把真实图片和本文件放在一起（例如建一个 images 文件夹），
+         然后写成  img:"images/xiangmu-01.jpg"  即可；
+       · gallery:[ ] 里可以放多张图片路径，会显示在项目详情页；
+         写 null 占位，写 "images/xx.jpg" 显示真图。
+       也可以直接填网络图片地址（https://... 开头）。
+
+   三、加项目：
+       复制 PROJECTS 里任意一个 { ... } 段落，粘贴后改掉
+       id（必须唯一，用英文小写和短横线）和其余内容即可。
+       删除项目就是删掉对应 { ... } 段落。
+       摄影 / 奖项 / 发表 同理，复制一行改内容即可。
+   ================================================================ */
+
+const SITE = {
+  name:{zh:"拉拉实验室", en:"Lala Lab"},
+  wordmark:"Lala Lab",
+  tagline:{zh:"建筑 · 艺术 · 家具 · 游戏", en:"Architecture · Public Art · Furniture · Games"},
+  heroIds:["mountain-library","riverside-museum","pavilion-of-light","bamboo-joint-chair","shanshui-journey"],   // 首页轮播的项目 id（五张，可增减）
+  featuredIds:["mountain-library","riverside-museum","bamboo-joint-chair",
+               "pavilion-of-light","shanshui-journey","courtyard-renewal"], // 首页精选
+  homeIntro:{
+    lede:{
+      zh:"从建筑到游戏，从场地到屏幕，我们相信设计是一种理解世界的方式——尺度会变，材料会变，但对空间、光与叙事的关心始终如一。",
+      en:"From buildings to games, from site to screen — design is a way of understanding the world. Scales and materials change; the care for space, light and narrative does not."
+    },
+    body:{
+      zh:"Lala Lab 是一间独立设计工作室，工作横跨建筑设计、公共艺术、家具与独立游戏。我们以小规模、长周期的方式推进每一个项目，让不同领域的经验彼此渗透：建筑训练带来的空间感进入游戏关卡，游戏设计的交互思维又反哺展览与装置。",
+      en:"Lala Lab is an independent design practice working across architecture, public art, furniture and indie games. We keep each project small and slow, letting disciplines inform one another — spatial thinking shapes game levels, while interactive design feeds back into installations."
+    }
+  }
+};
+
+const CATS = [
+  {id:"architecture", zh:"建筑设计",  en:"Architecture"},
+  {id:"public-art",   zh:"公共艺术",  en:"Public Art"},
+  {id:"furniture",    zh:"家具设计",  en:"Furniture"},
+  {id:"game",         zh:"游戏设计",  en:"Game Design"}
+];
+
+const PROJECTS = [
+  {
+    id:"mountain-library", cat:"architecture",
+    title:{zh:"山间书屋", en:"Mountain Library"},
+    location:{zh:"浙江 · 莫干山", en:"Moganshan, Zhejiang"},
+    year:"2024", area:"420 m²",
+    status:{zh:"建成", en:"Completed"},
+    tags:"图书馆 书店 木构 山地 library timber",
+    desc:{
+      zh:"书屋沿山势跌落为三个错层的阅读平台，木结构屋面顺着等高线展开，将远山纳入每一个座位的视线。立面以格栅过滤南向阳光，室内保留原场地的两株枫香，树影成为阅读的背景。\n项目试图回答一个简单的问题：在山里读书，应该是什么样子。",
+      en:"The library steps down the hillside as three staggered reading terraces. A timber roof follows the contours, framing distant peaks from every seat. Screened facades filter southern light, and two existing maples remain inside — their shadows becoming the backdrop of reading.\nThe project asks a simple question: what should reading in the mountains feel like?"
+    },
+    img:null, gallery:[null,null,null]
+  },
+  {
+    id:"riverside-museum", cat:"architecture",
+    title:{zh:"河畔美术馆", en:"Riverside Art Museum"},
+    location:{zh:"四川 · 成都", en:"Chengdu, Sichuan"},
+    year:"2023", area:"3,800 m²",
+    status:{zh:"在建", en:"Under Construction"},
+    tags:"美术馆 清水混凝土 滨水 museum concrete",
+    desc:{
+      zh:"美术馆以一道 120 米长的清水混凝土墙面向河流，墙体在三处断开，将河风、水声与人流引入内部庭院。展厅围绕庭院逆时针抬升，参观路径的终点是一个面向河面完全敞开的檐下空间。\n混凝土骨料取自场地开挖的卵石，让建筑从材料上属于这条河。",
+      en:"A 120-metre fair-faced concrete wall fronts the river, broken in three places to admit wind, water sounds and visitors into an inner courtyard. Galleries spiral upward around the court, ending at a deep eave fully open to the water.\nAggregate for the concrete came from riverbed pebbles excavated on site — the building belongs to the river by material."
+    },
+    img:null, gallery:[null,null,null]
+  },
+  {
+    id:"courtyard-renewal", cat:"architecture",
+    title:{zh:"旧城合院更新", en:"Courtyard Renewal"},
+    location:{zh:"北京 · 东城", en:"Dongcheng, Beijing"},
+    year:"2022", area:"260 m²",
+    status:{zh:"建成", en:"Completed"},
+    tags:"改造 更新 合院 胡同 renovation hutong",
+    desc:{
+      zh:"一座三进合院的更新：保留全部大木结构与灰砖墙体，新的功能体量以钢与半透明阳光板轻轻置入，与旧墙脱开 40 厘米，光从缝隙落下，新旧在一条光缝里相遇。\n院中原有的枣树、石榴与影壁全部保留，更新不是替换，而是续写。",
+      en:"Renewal of a three-court dwelling: all timber frames and grey brick walls retained, with new volumes of steel and translucent panels inserted 40 cm clear of the old walls. Light falls through the gap where old and new meet.\nThe jujube tree, pomegranate and screen wall all remain — renewal as continuation, not replacement."
+    },
+    img:null, gallery:[null,null,null]
+  },
+  {
+    id:"community-center", cat:"architecture",
+    title:{zh:"社区文化中心", en:"Community Cultural Center"},
+    location:{zh:"广东 · 深圳", en:"Shenzhen, Guangdong"},
+    year:"2021", area:"1,650 m²",
+    status:{zh:"建成", en:"Completed"},
+    tags:"文化中心 社区 公共 civic community",
+    desc:{
+      zh:"在高密度城中村边缘，用一个连续折叠的屋面把舞台、球场、图书角与市集覆盖在同一片荫凉之下。屋面即立面，立面即看台——建筑退后成为背景，生活是这里唯一的主角。",
+      en:"At the edge of a dense urban village, one continuously folding roof shelters a stage, a court, a reading corner and a market under shared shade. Roof becomes facade, facade becomes bleachers — the building recedes; everyday life is the only protagonist."
+    },
+    img:null, gallery:[null,null]
+  },
+  {
+    id:"pavilion-of-light", cat:"public-art",
+    title:{zh:"光之亭", en:"Pavilion of Light"},
+    location:{zh:"上海 · 西岸", en:"West Bund, Shanghai"},
+    year:"2024", area:"85 m²",
+    status:{zh:"临时装置", en:"Temporary Installation"},
+    tags:"装置 展亭 灯光 互动 pavilion installation light",
+    desc:{
+      zh:"由 2,400 根悬挂的半透明亚克力管组成的临时展亭。管内的光随江面风速实时变化——风越大，光的波纹越急。人穿行其中，身体成为光的扰动源。\n装置展期 90 天，结束后所有材料回收为艺术教室的教具。",
+      en:"A temporary pavilion of 2,400 suspended translucent acrylic tubes. Light inside the tubes responds in real time to wind speed over the river — stronger wind, faster ripples. Walking through, the body itself perturbs the light.\nAfter its 90-day run, all materials were recycled into teaching aids for art classrooms."
+    },
+    img:null, gallery:[null,null,null]
+  },
+  {
+    id:"urban-echo", cat:"public-art",
+    title:{zh:"城市回声", en:"Urban Echo"},
+    location:{zh:"重庆 · 渝中", en:"Yuzhong, Chongqing"},
+    year:"2022", area:"—",
+    status:{zh:"永久收藏", en:"Permanent Collection"},
+    tags:"声音装置 雕塑 公共 sound sculpture",
+    desc:{
+      zh:"六只朝向不同街巷的黄铜号角，收集城市的声音并在地下混响厅中叠加播放：轮渡的汽笛、火锅店的沸腾、缆车的铃。装置把一座立体城市的听觉切片保存下来。",
+      en:"Six brass horns face different streets, collecting the city's sounds and replaying them layered in an underground echo chamber: ferry whistles, boiling hotpot, cable-car bells — an acoustic cross-section of a vertical city."
+    },
+    img:null, gallery:[null,null]
+  },
+  {
+    id:"bamboo-joint-chair", cat:"furniture",
+    title:{zh:"竹节椅", en:"Bamboo Joint Chair"},
+    location:{zh:"自主研发", en:"Self-initiated"},
+    year:"2023", area:"—",
+    status:{zh:"小批量生产", en:"Small-batch Production"},
+    tags:"椅子 竹 家具 chair bamboo",
+    desc:{
+      zh:"以整根毛竹的天然竹节作为结构节点，不用一颗螺丝。竹材经高温碳化处理，颜色沉静，触感温润。每把椅子的弧度由那根竹子自己的生长决定——没有两把完全相同。",
+      en:"Natural bamboo nodes serve as structural joints — no screws at all. Heat-carbonised culms take on a calm colour and warm touch. Each chair's curve is decided by how that particular bamboo grew; no two are identical."
+    },
+    img:null, gallery:[null,null]
+  },
+  {
+    id:"floating-desk", cat:"furniture",
+    title:{zh:"悬浮书桌", en:"Floating Desk"},
+    location:{zh:"自主研发", en:"Self-initiated"},
+    year:"2022", area:"—",
+    status:{zh:"原型", en:"Prototype"},
+    tags:"书桌 钢 木 desk steel oak",
+    desc:{
+      zh:"3 毫米钢板折出的悬挑桌面，覆以白橡木薄板，靠墙侧仅两点固定，桌面如纸般悬浮。抽屉藏在折边之内，正面看不到任何五金。",
+      en:"A cantilevered top folded from 3 mm steel plate, veneered in white oak, fixed to the wall at only two points — the surface floats like a sheet of paper. Drawers hide within the fold; no hardware is visible from the front."
+    },
+    img:null, gallery:[null,null]
+  },
+  {
+    id:"origami-lamp", cat:"furniture",
+    title:{zh:"折纸灯", en:"Origami Lamp"},
+    location:{zh:"自主研发", en:"Self-initiated"},
+    year:"2021", area:"—",
+    status:{zh:"量产", en:"In Production"},
+    tags:"灯具 纸 照明 lamp paper lighting",
+    desc:{
+      zh:"一张杜邦纸，十七道折痕，一个磁扣——平板寄出，两分钟折成。灯光透过折面产生渐变的明暗，像山的剖面。",
+      en:"One sheet of Tyvek, seventeen creases, one magnetic clasp — shipped flat, folded in two minutes. Light grades across the facets like the section of a mountain."
+    },
+    img:null, gallery:[null,null]
+  },
+  {
+    id:"shanshui-journey", cat:"game",
+    title:{zh:"《山水行旅》", en:"Shanshui Journey"},
+    location:{zh:"独立游戏 · PC / Switch", en:"Indie Game · PC / Switch"},
+    year:"2025", area:"—",
+    status:{zh:"开发中", en:"In Development"},
+    tags:"游戏 水墨 解谜 步行模拟 game ink puzzle",
+    desc:{
+      zh:"一款以宋代山水长卷为空间原型的解谜步行游戏。玩家是一位赶路的画中人，通过改变视点让散点透视中的山径重新接续——建筑学的空间训练在这里变成了核心玩法。\n使用 Godot 引擎开发，全部场景以程序化水墨渲染。",
+      en:"A puzzle walking game built on the spatial logic of Song-dynasty landscape scrolls. As a traveller inside the painting, you shift viewpoints to reconnect mountain paths across shifting perspective — architectural spatial training turned into core mechanics.\nBuilt in Godot with fully procedural ink-wash rendering."
+    },
+    img:null, gallery:[null,null,null]
+  },
+  {
+    id:"the-alley", cat:"game",
+    title:{zh:"《巷》", en:"The Alley"},
+    location:{zh:"独立游戏 · PC / Mobile", en:"Indie Game · PC / Mobile"},
+    year:"2023", area:"—",
+    status:{zh:"已发行", en:"Released"},
+    tags:"游戏 叙事 城市 记忆 game narrative city",
+    desc:{
+      zh:"一条正在拆迁的老巷，二十四户人家，一个下午。玩家扮演上门测绘的实习生，用一把卷尺丈量房屋，也丈量居民的记忆。游戏时长九十分钟，与巷子最后的黄昏等长。",
+      en:"An old alley facing demolition, twenty-four households, one afternoon. As a surveying intern you measure the houses with a tape — and the residents' memories with your time. The game lasts ninety minutes, exactly as long as the alley's final dusk."
+    },
+    img:null, gallery:[null,null]
+  }
+];
+
+/* ---------- 研究 · 图像（照片与视频） ----------
+   · 照片：img:null 显示占位图，换成 "images/xx.jpg" 显示真图；
+   · 视频：写 type:"video"，并把 video:null 换成 "images/xx.mp4"
+     （img 字段可以放一张封面图，网格里显示封面 + 播放标志）；
+   · desc：点开大图后显示的一两行简介，用 \n 换行；不想要就整行删掉。 */
+const PHOTOS = [
+  {id:"ph-1", title:{zh:"晨雾中的梯田", en:"Terraces in Morning Mist"}, place:{zh:"云南 · 元阳", en:"Yuanyang, Yunnan"}, year:"2024", img:null,
+   desc:{zh:"清晨六点，雾从谷底漫上来，梯田的水面次第亮起。\n哈苏 500C/M · Portra 400",
+         en:"Six a.m. — mist climbs from the valley and the terraces light up one by one.\nHasselblad 500C/M · Portra 400"}},
+  {id:"ph-2", title:{zh:"筒子楼的黄昏", en:"Tenement at Dusk"}, place:{zh:"重庆", en:"Chongqing"}, year:"2023", img:null},
+  {id:"vd-1", type:"video", title:{zh:"光之亭：风的一分钟", en:"Pavilion of Light: One Minute of Wind"}, place:{zh:"上海 · 西岸", en:"West Bund, Shanghai"}, year:"2024", img:null, video:null,
+   desc:{zh:"装置对江面风速的实时响应，摄于撤展前的最后一晚。",
+         en:"The installation responding to river wind in real time, filmed on the final night before de-installation."}},
+  {id:"ph-3", title:{zh:"混凝土浇筑现场", en:"Concrete Pour"}, place:{zh:"成都工地", en:"Site, Chengdu"}, year:"2023", img:null,
+   desc:{zh:"河畔美术馆首层墙体连续浇筑的第 14 个小时。",
+         en:"Hour fourteen of the continuous pour for the museum's ground-floor wall."}},
+  {id:"ph-4", title:{zh:"海边的白墙", en:"White Wall by the Sea"}, place:{zh:"福建 · 平潭", en:"Pingtan, Fujian"}, year:"2022", img:null},
+  {id:"ph-5", title:{zh:"废弃厂房的天光", en:"Skylight in a Ruined Factory"}, place:{zh:"沈阳", en:"Shenyang"}, year:"2022", img:null},
+  {id:"vd-2", type:"video", title:{zh:"《山水行旅》先导预告", en:"Shanshui Journey: Teaser"}, place:{zh:"独立游戏", en:"Indie Game"}, year:"2025", img:null, video:null},
+  {id:"ph-6", title:{zh:"雪后的坡屋顶", en:"Pitched Roofs after Snow"}, place:{zh:"北京", en:"Beijing"}, year:"2021", img:null},
+  {id:"ph-7", title:{zh:"竹林光影", en:"Light through Bamboo"}, place:{zh:"莫干山", en:"Moganshan"}, year:"2021", img:null},
+  {id:"ph-8", title:{zh:"夜市的灯", en:"Night Market Lights"}, place:{zh:"台南", en:"Tainan"}, year:"2019", img:null}
+];
+
+/* ---------- 研究 · 随笔 ----------
+   · 新增随笔：复制一段 { ... }，改 id（唯一）、日期、标题、excerpt（列表页摘要）、body（正文）；
+   · body 用 \n 分段；想插图时，单独一段只写 [图1]，就会在该处插入 images 里第 1 张（[图2] 同理）；
+   · 纯文字随笔把 images 写成 [] 即可；图片说明 cap 可写可删。 */
+const ESSAYS = [
+  {
+    id:"contour-to-level", date:"2025-06",
+    title:{zh:"从等高线到关卡", en:"From Contours to Levels"},
+    tags:"建筑 游戏 关卡 地形 level terrain",
+    excerpt:{
+      zh:"画了十年等高线之后，我第一次在引擎里堆起一座山，忽然明白两件事其实是一件事。",
+      en:"After ten years of drawing contours, I raised my first mountain inside a game engine — and realised the two crafts are one."
+    },
+    body:{
+      zh:"建筑学院教我的第一件事是画等高线：线与线靠得越近，坡越陡；线突然断开的地方，是悬崖，或是人工砌起的坎。那时我以为这只是制图规范。\n后来在引擎里搭关卡，我把一张灰度高度图拖进地形工具，看着山从平面里缓缓隆起——那一瞬间像十年前的图纸活了过来。关卡设计师讲的「引导视线」「控制节奏」，与建筑里的「对景」「收放」几乎逐字对应。\n[图1]\n区别在于反馈的速度。建筑的等高线要等两年才能踩在脚下，关卡的等高线五分钟就能走进去。快让试错变得便宜，慢让每一道坎被认真对待。我现在的办法是让两种速度互相校对：先在引擎里跑通空间，再用建筑的耐心修每一个转角。\n所以《山水行旅》的每一章都是先有剖面，再有玩法。",
+      en:"The first thing architecture school taught me was contour lines: the closer they run, the steeper the slope; where they break, there is a cliff, or a wall someone built. I thought it was merely drafting convention.\nYears later, building levels, I dragged a greyscale heightmap into the terrain tool and watched a mountain rise out of the plane — the drawings of a decade ago coming alive. What level designers call sightline guidance and pacing maps almost word for word onto borrowed scenery and compression-and-release.\n[图1]\nThe difference is the speed of feedback. An architectural contour takes two years to stand on; a level contour is walkable in five minutes. Speed makes trial cheap; slowness makes every threshold deliberate. My method now is to let the two speeds proofread each other: block out the space in-engine first, then correct every corner with an architect's patience.\nWhich is why every chapter of Shanshui Journey begins as a section drawing before it becomes play."
+    },
+    images:[{src:null, cap:{zh:"山间书屋场地的等高线草图，与《山水行旅》第三章的关卡白模", en:"Site contours for the Mountain Library, beside a level blockout from Shanshui Journey, chapter three"}}]
+  },
+  {
+    id:"sounds-of-the-site", date:"2024-11",
+    title:{zh:"工地上的声音", en:"Sounds of the Site"},
+    tags:"声音 工地 城市 记录 sound field recording",
+    excerpt:{
+      zh:"混凝土浇筑的前夜，工地会进入一种奇怪的安静。我开始带一支录音笔上工地。",
+      en:"On the eve of a concrete pour the site falls strangely quiet. I started bringing a recorder."
+    },
+    body:{
+      zh:"混凝土浇筑的前夜，工地会进入一种奇怪的安静：模板都钉好了，钢筋验收完了，人散了，只剩下塔吊上的航空障碍灯一明一暗。第二天清晨五点，泵车一响，这种安静就被彻底冲走。\n我开始带一支录音笔上工地。振捣棒插进混凝土的嗡鸣、木模板受压的咯吱、对讲机里含混的四川话、午休时收音机放的评书——这些声音从不出现在建筑摄影里，但它们才是房子被造出来的证据。\n[图1]\n后来这批素材进入了《城市回声》。展厅里有观众说，听到泵车声的瞬间想起了自己父亲。声音比照片诚实：照片挑选瞬间，声音记录劳动。",
+      en:"On the eve of a pour the site falls strangely quiet: formwork nailed, rebar inspected, everyone gone, only the crane's aviation light blinking. At five the next morning the pump truck starts, and the quiet is washed away.\nI began carrying a recorder. The hum of the vibrator sinking into concrete, plywood creaking under pressure, blurred Sichuanese over the radio, storytelling broadcasts at lunch break — none of this appears in architectural photography, yet it is the true evidence of a building being made.\n[图1]\nThe material later became part of Urban Echo. A visitor said the sound of the pump truck reminded her of her father. Sound is more honest than photographs: a photo selects a moment; sound records the labour."
+    },
+    images:[{src:null, cap:{zh:"浇筑当晚的录音现场，成都", en:"Recording during the night pour, Chengdu"}}]
+  },
+  {
+    id:"reasons-to-be-slow", date:"2023-08",
+    title:{zh:"慢的理由", en:"Reasons to Be Slow"},
+    tags:"工作室 方法 独立 practice method",
+    excerpt:{
+      zh:"工作室成立三年，一共只做了十一个项目。常被问：为什么不扩张？",
+      en:"Three years, eleven projects. People keep asking why we don't scale up."
+    },
+    body:{
+      zh:"工作室成立三年，一共只做了十一个项目。常被问：为什么不扩张？\n慢不是美德，是方法。三个人的规模意味着每一个项目的每一张图都被同一双眼睛看过两遍，意味着我们可以在家具和游戏之间随时切换而不需要开协调会，也意味着可以对不合适的委托说不——说不，是小工作室唯一真正的权力。\n我们把省下来的规模，换成了时间：给竹子留出碳化的时间，给混凝土留出养护的时间，给一个关卡留出被推翻三次的时间。到目前为止，还没有哪个项目让我们后悔慢了。",
+      en:"Three years in, the studio has completed exactly eleven projects. People keep asking why we don't scale up.\nSlowness is not a virtue here; it is a method. Three people means every drawing is seen twice by the same eyes; it means switching between a chair and a game level without a coordination meeting; it means being able to say no to the wrong commission — and saying no is the only real power a small studio has.\nWhat we save in scale we spend as time: time for bamboo to carbonise, for concrete to cure, for a level to be thrown away three times. So far, no project has made us regret being slow."
+    },
+    images:[]
+  }
+];
+
+const AWARDS = [
+  {year:"2025", title:{zh:"独立游戏节（IGF）优秀视觉艺术提名 ——《山水行旅》", en:"IGF Excellence in Visual Art, Nominee — Shanshui Journey"}, tag:{zh:"游戏", en:"Game"}},
+  {year:"2024", title:{zh:"WA 中国建筑奖 · 居住贡献奖入围 —— 山间书屋", en:"WA Chinese Architecture Award, Finalist — Mountain Library"}, tag:{zh:"建筑", en:"Architecture"}},
+  {year:"2024", title:{zh:"上海城市空间艺术季 最佳公众参与奖 —— 光之亭", en:"SUSAS Best Public Engagement — Pavilion of Light"}, tag:{zh:"公共艺术", en:"Public Art"}},
+  {year:"2023", title:{zh:"红点设计奖（Red Dot）—— 竹节椅", en:"Red Dot Design Award — Bamboo Joint Chair"}, tag:{zh:"家具", en:"Furniture"}},
+  {year:"2023", title:{zh:"IndiePlay 中国独立游戏大赛 最佳叙事 ——《巷》", en:"IndiePlay Best Narrative — The Alley"}, tag:{zh:"游戏", en:"Game"}},
+  {year:"2022", title:{zh:"亚洲建筑师协会（ARCASIA）荣誉提名 —— 旧城合院更新", en:"ARCASIA Honourable Mention — Courtyard Renewal"}, tag:{zh:"建筑", en:"Architecture"}}
+];
+
+const PRESS = [
+  {year:"2025", media:"ArchDaily", title:{zh:"《当建筑师做游戏：山水长卷里的空间谜题》", en:"When Architects Make Games: Spatial Puzzles in a Landscape Scroll"}, url:"#", tag:{zh:"专访", en:"Interview"}},
+  {year:"2024", media:{zh:"《建筑学报》", en:"Architectural Journal"}, title:{zh:"《山间书屋：等高线上的阅读》", en:"Mountain Library: Reading along the Contours"}, url:"#", tag:{zh:"论文", en:"Paper"}},
+  {year:"2024", media:"gooood 谷德设计网", title:{zh:"《光之亭：风做的灯》", en:"Pavilion of Light: A Lamp Made of Wind"}, url:"#", tag:{zh:"项目报道", en:"Feature"}},
+  {year:"2023", media:"Dezeen", title:{zh:"《竹节椅——不用螺丝的竹家具》", en:"Bamboo Joint Chair: Bamboo Furniture without Screws"}, url:"#", tag:{zh:"报道", en:"Feature"}},
+  {year:"2023", media:{zh:"《游戏研究》", en:"Game Studies Quarterly"}, title:{zh:"《以尺丈量记忆：〈巷〉的空间叙事》", en:"Measuring Memory: Spatial Narrative in The Alley"}, url:"#", tag:{zh:"评论", en:"Review"}},
+  {year:"2022", media:{zh:"《三联生活周刊》", en:"Sanlian Lifeweek"}, title:{zh:"《在胡同里，新与旧隔着一道光》", en:"In the Hutong, Old and New Are a Beam of Light Apart"}, url:"#", tag:{zh:"报道", en:"Feature"}}
+];
+
+const ABOUT = {
+  person:{
+    name:{zh:"AAA", en:"AAA"},
+    role:{zh:"建筑师 / 游戏设计师 / 独立设计师", en:"Architect / Game Designer / Independent Designer"},
+    portrait:null,   // 换成 "images/portrait.jpg" 即可
+    bio:{
+      zh:"建筑学专业出身，执业建筑师。先后参与文化、教育与城市更新类项目，2020 年起以独立身份工作，同时进入游戏行业，负责关卡与空间叙事设计。\n相信不同尺度的设计共享同一种底层能力：组织空间、组织光、组织人的经验。工作之外持续进行摄影记录，关注普通人如何使用他们的城市。",
+      en:"Trained and licensed as an architect, with built work in cultural, educational and urban-renewal projects. Working independently since 2020, and concurrently in the game industry on level and spatial-narrative design.\nDesign at every scale shares one underlying craft: organising space, light and human experience. An ongoing photographic practice documents how ordinary people use their cities."
+    }
+  },
+  studio:{
+    name:{zh:"拉拉实验室 Lala Lab", en:"Lala Lab"},
+    intro:{
+      zh:"Lala Lab 成立于 2020 年，是一间面向多领域的独立设计工作室。我们保持极小的规模——核心成员三人，按项目组织协作网络。工作室同时运行两条线：面向场地的（建筑、公共艺术、家具）与面向屏幕的（游戏、交互），并刻意让两条线互相打扰。\n我们接受建筑设计、艺术装置、家具开发与游戏合作的委托，也发起自己的研究与出版。",
+      en:"Founded in 2020, Lala Lab is an independent, cross-disciplinary design studio. We stay deliberately small — three core members with a project-based network of collaborators. Two tracks run in parallel: site-facing (architecture, public art, furniture) and screen-facing (games, interaction) — and we make sure they interfere with each other.\nWe take commissions in architecture, installations, furniture and game collaborations, alongside self-initiated research and publishing."
+    },
+    fields:[
+      {zh:"建筑设计", en:"Architecture"},
+      {zh:"城市更新", en:"Urban Renewal"},
+      {zh:"公共艺术", en:"Public Art"},
+      {zh:"家具与产品", en:"Furniture & Product"},
+      {zh:"游戏与交互", en:"Games & Interaction"},
+      {zh:"摄影与出版", en:"Photography & Publishing"}
+    ]
+  }
+};
+
+const CONTACT = {
+  email:"hello@lalalab.studio",
+  phone:"+86 000 0000 0000",
+  address:{zh:"中国 · 某市某区某路 00 号 0 层（占位地址）", en:"Floor 0, No.00 Placeholder Rd., Some City, China"},
+  hours:{zh:"周一至周五 10:00 – 18:00", en:"Mon – Fri, 10:00 – 18:00"},
+  links:[
+    {label:"WeChat 公众号", url:"#", note:"LalaLab"},
+    {label:"Instagram", url:"#", note:"@lalalab.studio"},
+    {label:"Behance", url:"#", note:"lalalab"},
+    {label:"itch.io", url:"#", note:"lalalab.itch.io"}
+  ],
+  note:{
+    zh:"我们欢迎建筑设计、艺术装置、家具开发与游戏项目的合作洽谈，也欢迎媒体采访与讲座邀请。请直接邮件联系，通常会在三个工作日内回复。",
+    en:"We welcome enquiries for architecture, installations, furniture and game collaborations, as well as press and lecture invitations. Please write to us — we usually reply within three working days."
+  }
+};
+
+/* ---------- 界面文字（两种语言的按钮、栏目名等） ---------- */
+const UI = {
+  nav:{
+    projects:{zh:"项目", en:"Projects"},
+    photography:{zh:"研究", en:"Research"},
+    recognition:{zh:"媒体", en:"Media"},
+    about:{zh:"关于", en:"About"},
+    contact:{zh:"联系", en:"Contact"}
+  },
+  all:{zh:"全部", en:"All"},
+  featured:{zh:"精选项目", en:"Selected Works"},
+  viewAll:{zh:"查看全部", en:"View All"},
+  studioSec:{zh:"工作室", en:"Studio"},
+  newsSec:{zh:"近期动态", en:"Recent"},
+  awardsTitle:{zh:"奖项", en:"Awards"},
+  pressTitle:{zh:"媒体发表", en:"Press & Publications"},
+  personTitle:{zh:"个人简介", en:"Profile"},
+  studioTitle:{zh:"工作室简介", en:"About the Studio"},
+  fieldsTitle:{zh:"业务领域", en:"Fields of Practice"},
+  contactTitle:{zh:"联系方式", en:"Contact"},
+  emailL:{zh:"邮箱", en:"Email"}, phoneL:{zh:"电话", en:"Phone"},
+  addressL:{zh:"工作室地址", en:"Studio Address"}, hoursL:{zh:"开放时间", en:"Hours"},
+  followL:{zh:"关注我们", en:"Follow"},
+  searchPh:{zh:"搜索项目、摄影、奖项…", en:"Search projects, photos, awards…"},
+  searchHint:{zh:"输入关键词，例如：木构 / 游戏 / 2024 / concrete", en:"Try keywords: timber / game / 2024 / concrete"},
+  searchEmpty:{zh:"没有找到相关内容", en:"No results found"},
+  srProjects:{zh:"项目", en:"Projects"},
+  srPhotos:{zh:"摄影", en:"Photography"},
+  srAwards:{zh:"奖项", en:"Awards"},
+  srPress:{zh:"发表", en:"Press"},
+  srEssays:{zh:"随笔", en:"Essays"},
+  tabImages:{zh:"图像", en:"Images"},
+  tabEssays:{zh:"随笔", en:"Essays"},
+  backEssays:{zh:"返回随笔列表", en:"Back to Essays"},
+  essayLabel:{zh:"随笔", en:"Essay"},
+  videoPh:{zh:"视频占位——把这条数据的 video 字段换成 mp4 路径即可播放", en:"Video placeholder — set this item's video field to an mp4 path"},
+  loc:{zh:"地点", en:"Location"}, yr:{zh:"年份", en:"Year"},
+  ar:{zh:"规模", en:"Area"}, st:{zh:"状态", en:"Status"}, ct:{zh:"类型", en:"Type"},
+  back:{zh:"返回项目列表", en:"Back to Projects"},
+  prev:{zh:"上一个项目", en:"Previous"}, next:{zh:"下一个项目", en:"Next"},
+  scroll:{zh:"向下滚动", en:"Scroll"},
+  menuSearch:{zh:"搜索", en:"Search"},
+  footNav:{zh:"栏目", en:"Index"}, footContact:{zh:"联系", en:"Contact"},
+  rights:{zh:"版权所有", en:"All rights reserved"},
+  placeholder:{zh:"占位图", en:"Placeholder"}
+};
+/* ================================================================
+   以下为程序代码（路由 / 搜索 / 语言切换 / 占位图生成）
+   一般情况下不需要修改
+   ================================================================ */
+let lang = "zh";
+let heroTimer = null;
+
+const $ = s => document.querySelector(s);
+const t = x => (x == null) ? "" : (typeof x === "string" ? x : (x[lang] || x.zh || ""));
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+/* ---------- 占位图生成（按类别配色，基于 id 的确定性构图） ---------- */
+const PH_PALETTES = {
+  "architecture":["#b8b1a6","#8e877c","#6e675d"],
+  "public-art":["#a7b0b8","#7e8892","#5d6771"],
+  "furniture":["#bda98f","#96826a","#75634e"],
+  "game":["#9598a3","#63676f","#43464e"],
+  "photo":["#c3bfb8","#98938b","#726d64"],
+  "person":["#b5aca1","#877e73","#645c52"]
+};
+function hashStr(s){let h=5381;for(let i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0;}return h;}
+function phDataURI(seed, kind, label){
+  const pal = PH_PALETTES[kind] || PH_PALETTES["architecture"];
+  const h = hashStr(seed);
+  const r = n => ((h >> (n*3)) % 97) / 97;   // 0~1 伪随机
+  let shapes = "";
+  for(let i=0;i<5;i++){
+    const x=Math.round(r(i)*760), y=Math.round(r(i+5)*420),
+          w=Math.round(60+r(i+2)*380), hh=Math.round(40+r(i+7)*300),
+          o=(0.05+r(i+3)*0.12).toFixed(3),
+          fill=i%2?"#ffffff":"#000000";
+    shapes += `<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="${fill}" opacity="${o}"/>`;
+  }
+  const lx=Math.round(r(11)*700), ly=Math.round(r(12)*460);
+  shapes += `<line x1="${lx}" y1="0" x2="${lx}" y2="600" stroke="#ffffff" stroke-width="1" opacity="0.18"/>`;
+  shapes += `<line x1="0" y1="${ly}" x2="900" y2="${ly}" stroke="#ffffff" stroke-width="1" opacity="0.14"/>`;
+  const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="${pal[0]}"/><stop offset="0.55" stop-color="${pal[1]}"/><stop offset="1" stop-color="${pal[2]}"/>
+</linearGradient></defs>
+<rect width="900" height="600" fill="url(#g)"/>${shapes}
+<text x="450" y="306" text-anchor="middle" font-family="Helvetica Neue,PingFang SC,Microsoft YaHei,Arial,sans-serif" font-weight="300" font-size="30" letter-spacing="6" fill="#ffffff" opacity="0.8">${esc(label||"")}</text>
+<text x="450" y="560" text-anchor="middle" font-family="Consolas,Menlo,PingFang SC,Microsoft YaHei,monospace" font-size="12" letter-spacing="3" fill="#ffffff" opacity="0.45">PLACEHOLDER 占位图</text>
+</svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+function phBg(seed, kind, label){
+  return `<div class="ph" style="background-image:url('${phDataURI(seed,kind,label)}')"></div>`;
+}
+function imgOrPh(src, seed, kind, label, alt){
+  return src ? `<img src="${esc(src)}" alt="${esc(alt||label||"")}" loading="lazy">` : phBg(seed, kind, label);
+}
+
+/* ---------- 数据工具 ---------- */
+const projById = id => PROJECTS.find(p => p.id === id);
+const catById  = id => CATS.find(c => c.id === id);
+function catName(id){ const c = catById(id); return c ? t(c) : ""; }
+function paras(text){ return t(text).split("\n").map(p => `<p>${esc(p)}</p>`).join(""); }
+
+/* ---------- 顶栏与页脚 ---------- */
+function navLinks(){
+  const r = location.hash;
+  const plain = [
+    ["#/projects", UI.nav.projects],
+    ["#/photography", UI.nav.photography],
+    ["#/recognition", UI.nav.recognition]
+  ].map(([href,label]) =>
+    `<div class="nav-item"><a class="nav-link ${r.startsWith(href)?"active":""}" href="${href}">${t(label)}</a></div>`).join("");
+  const aboutActive = (r.startsWith("#/about")||r.startsWith("#/contact")) ? "active" : "";
+  return plain + `
+    <div class="nav-item has-sub">
+      <button type="button" class="nav-link ${aboutActive}" id="aboutToggle" aria-haspopup="true">${t(UI.nav.about)}
+        <svg class="caret" width="9" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.4"><polyline points="1,1 5,5 9,1"/></svg>
+      </button>
+      <div class="sub-menu">
+        <a href="#/about">${lang==="zh"?"简介":"Profile"}</a>
+        <a href="#/contact">${t(UI.nav.contact)}</a>
+      </div>
+    </div>`;
+}
+function headerHTML(){
+  return `
+  <header>
+    <div class="header-inner">
+      <a class="wordmark" href="#/">
+        <span class="en">${esc(SITE.wordmark)}</span>
+        <span class="zh">${t(SITE.tagline)}</span>
+      </a>
+      <nav>
+        ${navLinks()}
+        <div class="nav-tools">
+          <button class="icon-btn" id="searchBtn" aria-label="${t(UI.menuSearch)}" title="${t(UI.menuSearch)}">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/>
+            </svg>
+          </button>
+          <div class="lang-switch">
+            <button class="lang-opt ${lang==="zh"?"on":""}" data-lang="zh">中文</button>
+            <span class="lang-sep">|</span>
+            <button class="lang-opt ${lang==="en"?"on":""}" data-lang="en">ENGLISH</button>
+          </div>
+          <button class="burger" id="burgerBtn" aria-label="menu"><span></span><span></span><span></span></button>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#/projects">${t(UI.nav.projects)}<small>Projects</small></a>
+    <a href="#/photography">${t(UI.nav.photography)}<small>Research</small></a>
+    <a href="#/recognition">${t(UI.nav.recognition)}<small>Media</small></a>
+    <div class="mm-head">${t(UI.nav.about)}<small>About</small></div>
+    <a class="mm-sub" href="#/about">${lang==="zh"?"简介":"Profile"}</a>
+    <a class="mm-sub" href="#/contact">${t(UI.nav.contact)}</a>
+  </div>`;
+}
+function footerHTML(){
+  const y = new Date().getFullYear();
+  return `
+  <footer>
+    <div class="footer-inner">
+      <div class="fw">
+        <div class="en">${esc(SITE.wordmark)}</div>
+        <div class="zh">${t(SITE.tagline)}</div>
+      </div>
+      <div>
+        <h6>${t(UI.footNav)}</h6>
+        <a href="#/projects">${t(UI.nav.projects)}</a>
+        <a href="#/photography">${t(UI.nav.photography)}</a>
+        <a href="#/recognition">${t(UI.nav.recognition)}</a>
+        <a href="#/about">${t(UI.nav.about)}</a>
+      </div>
+      <div>
+        <h6>${t(UI.footContact)}</h6>
+        <a href="mailto:${esc(CONTACT.email)}">${esc(CONTACT.email)}</a>
+        <p>${t(CONTACT.address)}</p>
+      </div>
+    </div>
+    <div class="footer-base"><div class="container">
+      <span>© ${y} ${t(SITE.name)} · ${t(UI.rights)}</span>
+      <span>${lang==="zh"?"由 Lala Lab 设计与维护":"Designed & maintained by Lala Lab"}</span>
+    </div></div>
+  </footer>`;
+}
+
+/* ---------- 项目卡片 ---------- */
+function cardHTML(p){
+  return `
+  <a class="card" href="#/project/${p.id}">
+    <div class="thumb">
+      ${imgOrPh(p.img, p.id, p.cat, t(p.title))}
+      <div class="veil"><span>${lang==="zh"?"查看项目":"View Project"}</span></div>
+    </div>
+    <div class="meta">
+      <div class="t">${t(p.title)}</div>
+      <div class="s">${catName(p.cat)} · ${p.year}</div>
+    </div>
+  </a>`;
+}
+
+/* ---------- 各页面 ---------- */
+function pageHome(){
+  const heroes = SITE.heroIds.map(projById).filter(Boolean);
+  const feats  = SITE.featuredIds.map(projById).filter(Boolean);
+  const news = [
+    ...AWARDS.slice(0,2).map(a => ({year:a.year, txt:t(a.title), tag:t(a.tag), href:"#/recognition"})),
+    ...PRESS.slice(0,1).map(p => ({year:p.year, txt:`${t(p.media)} · ${t(p.title)}`, tag:t(p.tag), href:"#/recognition"}))
+  ];
+  return `
+  <div class="page">
+    <div class="hero" id="hero">
+      ${heroes.map((p,i)=>`
+        <a class="hero-slide ${i===0?"on":""}" data-i="${i}" href="#/project/${p.id}">
+          ${imgOrPh(p.img, p.id, p.cat, t(p.title))}
+          <div class="hero-veil"></div>
+          <div class="hero-cap">
+            <div class="cat">${catName(p.cat)} · ${p.year}</div>
+            <h2>${t(p.title)}</h2>
+            <div class="en-t">${esc(lang==="zh" ? (p.title.en||"") : (p.title.zh||""))}</div>
+          </div>
+        </a>`).join("")}
+      <div class="hero-dots">${heroes.map((_,i)=>`<button data-dot="${i}" class="${i===0?"on":""}" aria-label="slide ${i+1}"></button>`).join("")}</div>
+      <div class="hero-scroll">${t(UI.scroll)}</div>
+    </div>
+
+    <div class="container">
+      <section class="home-sec">
+        <div class="sec-head"><h3>${t(UI.featured)}</h3><a class="more" href="#/projects">${t(UI.viewAll)} →</a></div>
+        <div class="grid">${feats.map(cardHTML).join("")}</div>
+      </section>
+
+      <section class="home-sec">
+        <div class="sec-head"><h3>${t(UI.studioSec)}</h3><a class="more" href="#/about">${t(UI.viewAll)} →</a></div>
+        <div class="intro-block">
+          <div class="lede">${t(SITE.homeIntro.lede)}</div>
+          <div class="body">${paras(SITE.homeIntro.body)}</div>
+        </div>
+      </section>
+
+      <section class="home-sec">
+        <div class="sec-head"><h3>${t(UI.newsSec)}</h3><a class="more" href="#/recognition">${t(UI.viewAll)} →</a></div>
+        <div class="list-rows">
+          ${news.map(n=>`<a class="row" href="${n.href}"><span class="yr">${n.year}</span><span class="t">${esc(n.txt)}</span><span class="tag">${esc(n.tag)}</span></a>`).join("")}
+        </div>
+      </section>
+    </div>
+  </div>`;
+}
+
+function pageProjects(cat){
+  const list = cat ? PROJECTS.filter(p=>p.cat===cat) : PROJECTS;
+  return `
+  <div class="page container">
+    <div class="page-head">
+      <h1>${t(UI.nav.projects)}</h1><div class="sub">Projects</div>
+    </div>
+    <div class="filters">
+      <button class="${!cat?"on":""}" data-cat="">${t(UI.all)}</button>
+      ${CATS.map(c=>`<button class="${cat===c.id?"on":""}" data-cat="${c.id}">${t(c)}</button>`).join("")}
+    </div>
+    <div class="grid">${list.map(cardHTML).join("")}</div>
+  </div>`;
+}
+
+function pageProject(id){
+  const p = projById(id);
+  if(!p) return `<div class="page container"><div class="page-head"><h1>404</h1></div></div>`;
+  const idx = PROJECTS.indexOf(p);
+  const prev = PROJECTS[(idx-1+PROJECTS.length)%PROJECTS.length];
+  const next = PROJECTS[(idx+1)%PROJECTS.length];
+  const gal = (p.gallery||[]);
+  return `
+  <div class="page">
+    <div class="container">
+      <div class="detail-title">
+        <h1>${t(p.title)}</h1>
+        <div class="en-t">${esc(lang==="zh" ? (p.title.en||"") : (p.title.zh||""))}</div>
+      </div>
+    </div>
+    <div class="detail-hero">${imgOrPh(p.img, p.id, p.cat, t(p.title))}</div>
+    <div class="container">
+      <div class="detail-grid">
+        <aside class="spec"><dl>
+          <dt>${t(UI.ct)}</dt><dd>${catName(p.cat)}</dd>
+          <dt>${t(UI.loc)}</dt><dd>${t(p.location)}</dd>
+          <dt>${t(UI.yr)}</dt><dd>${p.year}</dd>
+          <dt>${t(UI.ar)}</dt><dd>${p.area}</dd>
+          <dt>${t(UI.st)}</dt><dd>${t(p.status)}</dd>
+        </dl></aside>
+        <div class="detail-body">${paras(p.desc)}</div>
+      </div>
+      <div class="gallery ${gal.length>1?"gallery-2":""}">
+        ${gal.map((g,i)=>`<div class="g-item ${i%3===2?"tall":""}">${imgOrPh(g, p.id+"-g"+i, p.cat, t(p.title)+" · "+(i+1))}</div>`).join("")}
+      </div>
+      <a class="back-link" href="#/projects">← ${t(UI.back)}</a>
+      <div class="next-prev">
+        <a href="#/project/${prev.id}"><span class="lab">← ${t(UI.prev)}</span>${t(prev.title)}</a>
+        <a style="text-align:right" href="#/project/${next.id}"><span class="lab">${t(UI.next)} →</span>${t(next.title)}</a>
+      </div>
+    </div>
+  </div>`;
+}
+
+const PLAY_BADGE = `<div class="play-badge"><span><svg width="14" height="16" viewBox="0 0 14 16" fill="#ffffff"><path d="M1 1 L13 8 L1 15 Z"/></svg></span></div>`;
+
+function pagePhotography(tab){
+  const isEssays = tab === "essays";
+  const imagesHTML = `
+    <div class="photo-grid">
+      ${PHOTOS.map((ph,i)=>`
+        <div class="photo-item" data-photo="${i}">
+          <div class="thumb">${imgOrPh(ph.img, ph.id, "photo", t(ph.title))}${ph.type==="video"?PLAY_BADGE:""}</div>
+          <div class="cap">${t(ph.title)} · ${t(ph.place)} · ${ph.year}</div>
+        </div>`).join("")}
+    </div>`;
+  const essaysHTML = `
+    <div class="essay-list">
+      ${ESSAYS.map(e=>`
+        <a class="essay-item" href="#/essay/${e.id}">
+          <span class="date">${e.date}</span>
+          <span>
+            <span class="e-title">${t(e.title)}</span>
+            <span class="e-ex">${esc(t(e.excerpt))}</span>
+          </span>
+        </a>`).join("")}
+    </div>`;
+  return `
+  <div class="page container">
+    <div class="page-head">
+      <h1>${t(UI.nav.photography)}</h1><div class="sub">Research</div>
+      <div class="desc">${lang==="zh"?"以图像与文字进行的持续记录：建筑、工地、街道与人。":"An ongoing record in images and words: buildings, sites, streets and people."}</div>
+    </div>
+    <div class="filters">
+      <button class="${!isEssays?"on":""}" data-rtab="images">${t(UI.tabImages)}</button>
+      <button class="${isEssays?"on":""}" data-rtab="essays">${t(UI.tabEssays)}</button>
+    </div>
+    ${isEssays ? essaysHTML : imagesHTML}
+  </div>`;
+}
+
+const essayById = id => ESSAYS.find(e => e.id === id);
+function essayBodyHTML(e){
+  const imgs = e.images || [];
+  return t(e.body).split("\n").map(par=>{
+    const s = par.trim();
+    const m = s.match(/^\[图(\d+)\]$/);
+    if(m){
+      const im = imgs[+m[1]-1];
+      if(!im) return "";
+      return `<figure class="essay-fig">
+        <div class="fig-img">${imgOrPh(im.src, e.id+"-fig"+m[1], "photo", t(e.title))}</div>
+        <figcaption>${esc(t(im.cap))}</figcaption>
+      </figure>`;
+    }
+    return s ? `<p>${esc(par)}</p>` : "";
+  }).join("");
+}
+function pageEssay(id){
+  const e = essayById(id);
+  if(!e) return `<div class="page container"><div class="page-head"><h1>404</h1></div></div>`;
+  return `
+  <div class="page container">
+    <article class="essay-article">
+      <div class="essay-meta"><span>${e.date}</span><span>${t(UI.essayLabel)}</span></div>
+      <h1>${t(e.title)}</h1>
+      <div class="essay-sub">${esc(lang==="zh" ? (e.title.en||"") : (e.title.zh||""))}</div>
+      <div class="essay-body">${essayBodyHTML(e)}</div>
+      <a class="back-link" href="#/photography/essays">← ${t(UI.backEssays)}</a>
+    </article>
+  </div>`;
+}
+
+function rowsHTML(items, isPress){
+  return items.map(it=>{
+    const inner = `
+      <span class="yr">${it.year}</span>
+      <span class="t">${isPress ? `${esc(t(it.media))}<small>${esc(t(it.title))}</small>` : esc(t(it.title))}</span>
+      <span class="tag">${esc(t(it.tag))}</span>`;
+    return (isPress && it.url && it.url!=="#")
+      ? `<a class="row" href="${esc(it.url)}" target="_blank" rel="noopener">${inner}</a>`
+      : `<div class="row">${inner}</div>`;
+  }).join("");
+}
+function pageRecognition(){
+  return `
+  <div class="page container">
+    <div class="page-head">
+      <h1>${t(UI.nav.recognition)}</h1><div class="sub">Awards · Press · Publications</div>
+    </div>
+    <div class="sub-sec">
+      <h2>${t(UI.awardsTitle)}</h2>${lang==="zh"?'<div class="sub-en">Awards</div>':""}
+      <div class="list-rows">${rowsHTML(AWARDS,false)}</div>
+    </div>
+    <div class="sub-sec">
+      <h2>${t(UI.pressTitle)}</h2>${lang==="zh"?'<div class="sub-en">Press & Publications</div>':""}
+      <div class="list-rows">${rowsHTML(PRESS,true)}</div>
+    </div>
+  </div>`;
+}
+
+function jkLabel(zh, en){
+  return lang==="zh" ? `${esc(zh)}<span>${esc(en)}</span>` : esc(en);
+}
+function pageAbout(){
+  const P = ABOUT.person, S = ABOUT.studio;
+  const intro = t(S.intro).split("\n");
+  const lede = intro[0];
+  const rest = intro.slice(1);
+  return `
+  <div class="page container">
+    <div class="page-head">
+      <h1>${lang==="zh"?"简介":"Profile"}</h1><div class="sub">Profile</div>
+    </div>
+    <div class="jk-lede">${esc(lede)}</div>
+    <div class="jk-secs">
+      <section class="jk-sec" id="sec-practice">
+        <div class="jk-label">${jkLabel("事务所","Practice")}</div>
+        <div class="jk-content">${rest.map(p=>`<p>${esc(p)}</p>`).join("") || `<p>${esc(lede)}</p>`}</div>
+      </section>
+      <section class="jk-sec" id="sec-principal">
+        <div class="jk-label">${jkLabel("主持设计师","Principal")}</div>
+        <div class="jk-content">
+          <div class="jk-portrait">${imgOrPh(P.portrait, "portrait", "person", t(P.name))}</div>
+          <div class="jk-name">${t(P.name)}</div>
+          <div class="jk-role">${t(P.role)}</div>
+          ${paras(P.bio)}
+        </div>
+      </section>
+      <section class="jk-sec">
+        <div class="jk-label">${jkLabel("业务领域","Fields")}</div>
+        <div class="jk-content"><p>${S.fields.map(f=>t(f)).join(" / ")}</p></div>
+      </section>
+    </div>
+  </div>`;
+}
+
+function pageContact(){
+  return `
+  <div class="page container">
+    <div class="page-head">
+      <h1>${t(UI.contactTitle)}</h1><div class="sub">Contact</div>
+    </div>
+    <div class="jk-lede">${t(CONTACT.note)}</div>
+    <div class="jk-secs">
+      <section class="jk-sec">
+        <div class="jk-label">${jkLabel("联系","Contact")}</div>
+        <div class="jk-content">
+          <div class="jk-line"><a href="mailto:${esc(CONTACT.email)}">${esc(CONTACT.email)}</a></div>
+          <div class="jk-line">${esc(CONTACT.phone)}</div>
+        </div>
+      </section>
+      <section class="jk-sec">
+        <div class="jk-label">${jkLabel("地址","Address")}</div>
+        <div class="jk-content">
+          <div class="jk-line">${t(CONTACT.address)}</div>
+          <div class="jk-line">${t(CONTACT.hours)}</div>
+        </div>
+      </section>
+      <section class="jk-sec">
+        <div class="jk-label">${jkLabel("关注","Follow")}</div>
+        <div class="jk-content">
+          ${CONTACT.links.map(l=>`<div class="jk-line"><a href="${esc(l.url)}">${esc(l.label)}</a><small>${esc(l.note)}</small></div>`).join("")}
+        </div>
+      </section>
+    </div>
+  </div>`;
+}
+
+/* ---------- 搜索 ---------- */
+function searchIndex(){
+  const ix = [];
+  PROJECTS.forEach(p=>ix.push({
+    type:"project", href:"#/project/"+p.id,
+    label:t(p.title), right:`${catName(p.cat)} · ${p.year}`,
+    hay:[p.title.zh,p.title.en,p.location.zh,p.location.en,p.year,p.tags,catById(p.cat).zh,catById(p.cat).en,p.cat,p.status.zh,p.status.en,p.desc.zh,p.desc.en].join(" ").toLowerCase()
+  }));
+  PHOTOS.forEach(ph=>ix.push({
+    type:"photo", href:"#/photography",
+    label:t(ph.title), right:`${t(ph.place)} · ${ph.year}`,
+    hay:[ph.title.zh,ph.title.en,ph.place.zh,ph.place.en,ph.year,(ph.desc?ph.desc.zh+" "+ph.desc.en:""),(ph.type==="video"?"视频 video":"")].join(" ").toLowerCase()
+  }));
+  ESSAYS.forEach(e=>ix.push({
+    type:"essay", href:"#/essay/"+e.id,
+    label:t(e.title), right:e.date,
+    hay:[e.title.zh,e.title.en,e.excerpt.zh,e.excerpt.en,e.body.zh,e.body.en,e.tags,e.date].join(" ").toLowerCase()
+  }));
+  AWARDS.forEach(a=>ix.push({
+    type:"award", href:"#/recognition",
+    label:t(a.title), right:a.year,
+    hay:[a.title.zh,a.title.en,a.year,t(a.tag)].join(" ").toLowerCase()
+  }));
+  PRESS.forEach(p=>ix.push({
+    type:"press", href:"#/recognition",
+    label:`${t(p.media)} · ${t(p.title)}`, right:p.year,
+    hay:[t(p.media),p.title.zh,p.title.en,p.year,t(p.tag)].join(" ").toLowerCase()
+  }));
+  return ix;
+}
+function highlight(label, q){
+  const i = label.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0) return esc(label);
+  return esc(label.slice(0,i)) + "<mark>" + esc(label.slice(i,i+q.length)) + "</mark>" + esc(label.slice(i+q.length));
+}
+function runSearch(q){
+  const box = $("#searchResults");
+  q = q.trim();
+  if(!q){ box.innerHTML = ""; return; }
+  const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const hits = searchIndex().filter(e => terms.every(w => e.hay.includes(w)));
+  if(!hits.length){ box.innerHTML = `<div class="sr-empty">${t(UI.searchEmpty)} — “${esc(q)}”</div>`; return; }
+  const groups = [
+    ["project",UI.srProjects],["photo",UI.srPhotos],["essay",UI.srEssays],["award",UI.srAwards],["press",UI.srPress]
+  ];
+  box.innerHTML = groups.map(([type,label])=>{
+    const g = hits.filter(h=>h.type===type);
+    if(!g.length) return "";
+    return `<div class="sr-group"><h5>${t(label)} · ${g.length}</h5>
+      ${g.map(h=>`<a class="sr-item" href="${h.href}" data-close-search>
+        <span>${highlight(h.label, terms[0])}</span><span class="r">${esc(h.right)}</span></a>`).join("")}
+    </div>`;
+  }).join("");
+}
+function searchLayerHTML(){
+  return `
+  <div class="search-layer" id="searchLayer">
+    <button class="search-x" id="searchClose" aria-label="close">×</button>
+    <div class="search-top">
+      <div class="search-box">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/>
+        </svg>
+        <input id="searchInput" type="text" placeholder="${t(UI.searchPh)}" autocomplete="off">
+      </div>
+      <div class="search-hint">${t(UI.searchHint)}</div>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>`;
+}
+function openSearch(){
+  $("#searchLayer").classList.add("open");
+  document.body.style.overflow="hidden";
+  setTimeout(()=>$("#searchInput").focus(),40);
+}
+function closeSearch(){
+  $("#searchLayer").classList.remove("open");
+  document.body.style.overflow="";
+}
+
+/* ---------- 灯箱 ---------- */
+function lightboxHTML(){
+  return `<div class="lightbox" id="lightbox">
+    <button class="lb-x" id="lbClose" aria-label="close">×</button>
+    <div class="lb-img" id="lbImg"></div>
+    <div class="lb-cap" id="lbCap"></div>
+  </div>`;
+}
+function openLightbox(i){
+  const ph = PHOTOS[i]; if(!ph) return;
+  let media;
+  if(ph.type === "video"){
+    media = ph.video
+      ? `<video src="${esc(ph.video)}" controls playsinline style="max-width:88vw;max-height:70vh;background:#000"></video>`
+      : `<div style="position:relative">${phBg(ph.id+"-lb","photo",t(ph.title))}${PLAY_BADGE}</div>`;
+  } else {
+    media = ph.img
+      ? `<img src="${esc(ph.img)}" alt="${esc(t(ph.title))}" style="max-width:88vw;max-height:74vh">`
+      : phBg(ph.id+"-lb","photo",t(ph.title));
+  }
+  $("#lbImg").innerHTML = media;
+  let cap = `${esc(t(ph.title))} · ${esc(t(ph.place))} · ${ph.year}`;
+  if(ph.desc) cap += `<div class="lb-desc">${esc(t(ph.desc))}</div>`;
+  else if(ph.type==="video" && !ph.video) cap += `<div class="lb-desc">${t(UI.videoPh)}</div>`;
+  $("#lbCap").innerHTML = cap;
+  $("#lightbox").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeLightbox(){
+  $("#lightbox").classList.remove("open");
+  document.body.style.overflow="";
+}
+
+/* ---------- 路由与渲染 ---------- */
+function route(){
+  const h = location.hash.replace(/^#\/?/,"");
+  const seg = h.split("/").filter(Boolean);
+  if(seg[0]==="projects") return {page:"projects", cat:seg[1]||""};
+  if(seg[0]==="project" && seg[1]) return {page:"project", id:seg[1]};
+  if(seg[0]==="photography") return {page:"photography", tab:(seg[1]==="essays"?"essays":"images")};
+  if(seg[0]==="essay" && seg[1]) return {page:"essay", id:seg[1]};
+  if(seg[0]==="recognition") return {page:"recognition"};
+  if(seg[0]==="about") return {page:"about", anchor:seg[1]||""};
+  if(seg[0]==="contact") return {page:"contact"};
+  return {page:"home"};
+}
+function render(){
+  if(heroTimer){ clearInterval(heroTimer); heroTimer = null; }
+  const r = route();
+  let inner = "";
+  switch(r.page){
+    case "projects": inner = pageProjects(r.cat); break;
+    case "project": inner = pageProject(r.id); break;
+    case "photography": inner = pagePhotography(r.tab); break;
+    case "essay": inner = pageEssay(r.id); break;
+    case "recognition": inner = pageRecognition(); break;
+    case "about": inner = pageAbout(); break;
+    case "contact": inner = pageContact(); break;
+    default: inner = pageHome();
+  }
+  $("#app").innerHTML = headerHTML() + `<main>${inner}</main>` + footerHTML() + searchLayerHTML() + lightboxHTML();
+  bindEvents(r);
+  const titles = {
+    home:"", projects:t(UI.nav.projects), project:(projById(r.id)?t(projById(r.id).title):""),
+    photography:t(UI.nav.photography), essay:(essayById(r.id)?t(essayById(r.id).title):""),
+    recognition:t(UI.nav.recognition),
+    about:(lang==="zh"?"简介":"Profile"), contact:t(UI.nav.contact)
+  };
+  document.title = (titles[r.page]?titles[r.page]+" — ":"") + t(SITE.name) + (lang==="zh"?" | Lala Lab":"");
+  window.scrollTo(0,0);
+  updateHeaderState();
+  if(r.page==="about" && r.anchor){
+    const el = document.getElementById("sec-"+r.anchor);
+    if(el){ window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 86); }
+  }
+}
+function updateHeaderState(){
+  const isHome = route().page === "home";
+  document.body.classList.toggle("route-home", isHome);
+  const onTop = isHome
+    && !document.body.classList.contains("mobile-open")
+    && window.scrollY < window.innerHeight - 90;
+  document.body.classList.toggle("hero-top", onTop);
+}
+window.addEventListener("scroll", updateHeaderState, {passive:true});
+window.addEventListener("resize", updateHeaderState);
+
+function bindEvents(r){
+  document.querySelectorAll(".lang-opt").forEach(btn=>{
+    btn.onclick = () => {
+      if(lang !== btn.dataset.lang){
+        lang = btn.dataset.lang;
+        document.documentElement.lang = lang;
+        render();
+      }
+    };
+  });
+  $("#searchBtn").onclick = openSearch;
+  $("#searchClose").onclick = closeSearch;
+  $("#searchInput").oninput = e => runSearch(e.target.value);
+  $("#searchLayer").addEventListener("click", e => { if(e.target.closest("[data-close-search]")) closeSearch(); });
+  const aboutToggle = $("#aboutToggle");
+  if(aboutToggle){
+    aboutToggle.onclick = e => {
+      e.preventDefault();
+      aboutToggle.closest(".nav-item").classList.toggle("open");
+    };
+  }
+  document.onclick = e => {
+    if(!e.target.closest(".nav-item.has-sub")){
+      document.querySelectorAll(".nav-item.has-sub.open").forEach(x=>x.classList.remove("open"));
+    }
+  };
+  $("#burgerBtn").onclick = () => { document.body.classList.toggle("mobile-open"); updateHeaderState(); };
+  $("#mobileMenu").addEventListener("click", e => { if(e.target.closest("a")){ document.body.classList.remove("mobile-open"); updateHeaderState(); } });
+  $("#lbClose").onclick = closeLightbox;
+  $("#lightbox").onclick = e => { if(e.target.id==="lightbox") closeLightbox(); };
+
+  document.querySelectorAll(".filters button[data-cat]").forEach(b=>{
+    b.onclick = () => { const c=b.dataset.cat; location.hash = c ? "#/projects/"+c : "#/projects"; };
+  });
+  document.querySelectorAll(".filters button[data-rtab]").forEach(b=>{
+    b.onclick = () => { location.hash = b.dataset.rtab==="essays" ? "#/photography/essays" : "#/photography"; };
+  });
+  document.querySelectorAll("[data-photo]").forEach(el=>{
+    el.onclick = () => openLightbox(+el.dataset.photo);
+  });
+
+  if(r.page==="home"){
+    const slides = document.querySelectorAll(".hero-slide");
+    const dots = document.querySelectorAll(".hero-dots button");
+    let cur = 0;
+    const go = i => {
+      cur = (i+slides.length)%slides.length;
+      slides.forEach((s,j)=>s.classList.toggle("on", j===cur));
+      dots.forEach((d,j)=>d.classList.toggle("on", j===cur));
+    };
+    dots.forEach(d=>d.onclick = e => { e.preventDefault(); go(+d.dataset.dot); });
+    if(slides.length>1) heroTimer = setInterval(()=>go(cur+1), 5200);
+  }
+}
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){ closeSearch(); closeLightbox(); document.body.classList.remove("mobile-open"); }
+  if(e.key==="/" && !$("#searchLayer").classList.contains("open") && document.activeElement.tagName!=="INPUT"){
+    e.preventDefault(); openSearch();
+  }
+});
+window.addEventListener("hashchange", render);
+render();
+</script>
+</body>
+</html>
